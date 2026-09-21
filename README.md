@@ -11,7 +11,7 @@ Built as a native desktop application, it combines a robust **Python backend** u
 
 ---
 
-## 📸 Dashboard Preview
+## Dashboard Preview
 
 * **Live Traffic Stream**: View details of packets (IPv4, IPv6, TCP, UDP, ARP, DNS, ICMP, HTTP) captured in real-time.
 * **Intrusion Detection Feed**: Visual alerts for port scanning, TCP SYN floods, ARP cache spoofing, and suspicious DNS requests.
@@ -20,7 +20,7 @@ Built as a native desktop application, it combines a robust **Python backend** u
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * **Backend Core**: Python, Scapy (raw packet parsing)
 * **Web Server**: FastAPI, Uvicorn, WebSockets (live data streaming)
@@ -31,7 +31,7 @@ Built as a native desktop application, it combines a robust **Python backend** u
 
 ---
 
-## 📐 Architecture Flow
+## Architecture Flow
 
 ```mermaid
 graph TD
@@ -46,7 +46,7 @@ graph TD
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -72,7 +72,7 @@ graph TD
 
 ---
 
-## 🚀 Running the Application
+## Running the Application
 
 Because packet sniffing requires binding to low-level network adapter drivers, the application **must be run with Administrative / root privileges**.
 
@@ -91,7 +91,7 @@ Because packet sniffing requires binding to low-level network adapter drivers, t
 
 ---
 
-## 🛡️ Threat Intelligence (IDS Detections)
+## Threat Intelligence (IDS Detections)
 
 The integrated threat detection engine analyzes packets in real-time to identify anomalies:
 * **Port Scanning Detection**: Raises a high-severity alert if an IP attempts connections to more than 15 unique destination ports within a rolling 10-second window.
@@ -102,7 +102,7 @@ The integrated threat detection engine analyzes packets in real-time to identify
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 ├── backend/
@@ -120,7 +120,7 @@ The integrated threat detection engine analyzes packets in real-time to identify
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
