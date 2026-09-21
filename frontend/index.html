@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Packet Sniffer & Threat Detector</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Link -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Chart.js and Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- TOP CONTROL BAR -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="shield-alert"></i>
+                    <span class="pulse-dot"></span>
+                </div>
+                <div class="logo-text">
+                    <h1>APEX SNIFFER</h1>
+                    <span class="subtitle">Real-time Anomaly Detection</span>
+                </div>
+            </div>
+            
+            <div class="controls-area">
+                <div class="control-group">
+                    <label for="interface-select"><i data-lucide="network"></i> Interface</label>
+                    <select id="interface-select">
+                        <option value="">Loading adapters...</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="filter-input"><i data-lucide="filter"></i> BPF Filter</label>
+                    <input type="text" id="filter-input" placeholder="e.g. tcp, udp, port 80..." />
+                </div>
+                
+                <div class="btn-group">
+                    <button id="start-btn" class="btn btn-success">
+                        <i data-lucide="play"></i> Start
+                    </button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>
+                        <i data-lucide="square"></i> Stop
+                    </button>
+                    <button id="clear-btn" class="btn btn-secondary">
+                        <i data-lucide="trash-2"></i> Clear
+                    </button>
+                    <button id="download-btn" class="btn btn-primary">
+                        <i data-lucide="download"></i> PCAP
+                    </button>
+                </div>
+            </div>
+            
+            <div class="status-area">
+                <div id="connection-badge" class="badge badge-disconnected">
+                    <span class="badge-dot"></span>
+                    <span class="badge-text">Offline</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- MAIN DASHBOARD CONTENT -->
+        <main class="dashboard-grid">
+            
+            <!-- LEFT PANEL: CHARTS & STATS SUMMARY -->
+            <section class="left-panel">
+                
+                <!-- STATS CARDS -->
+                <div class="metrics-grid">
+                    <div class="metric-card card-blue">
+                        <div class="metric-icon"><i data-lucide="activity"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-val" id="stat-pps">0.0</span>
+                            <span class="metric-lbl">Packets / Sec</span>
+                        </div>
+                    </div>
+                    <div class="metric-card card-purple">
+                        <div class="metric-icon"><i data-lucide="database"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-val" id="stat-total-packets">0</span>
+                            <span class="metric-lbl">Total Packets</span>
+                        </div>
+                    </div>
+                    <div class="metric-card card-green">
+                        <div class="metric-icon"><i data-lucide="zap"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-val" id="stat-bandwidth">0 B/s</span>
+                            <span class="metric-lbl">Bandwidth</span>
+                        </div>
+                    </div>
+                    <div class="metric-card card-rose" id="threats-card">
+                        <div class="metric-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="metric-data">
+                            <span class="metric-val" id="stat-alerts">0</span>
+                            <span class="metric-lbl">Security Threats</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CHART 1: BANDWIDTH OVER TIME -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i data-lucide="trending-up"></i> Traffic Throughput (Bytes/sec)</h2>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="bandwidth-chart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- CHART 2: PROTOCOL BREAKDOWN -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i data-lucide="pie-chart"></i> Protocol Distribution</h2>
+                    </div>
+                    <div class="card-body doughnut-container">
+                        <canvas id="protocol-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- CENTER/RIGHT PANEL: LIVE PACKET STREAM & THREAT LOGS -->
+            <section class="main-panel">
+                
+                <!-- PACKET LIST CONTAINER -->
+                <div class="card packet-list-card">
+                    <div class="card-header list-controls-header">
+                        <div class="header-title">
+                            <h2><i data-lucide="list"></i> Live Packet Stream</h2>
+                        </div>
+                        <div class="list-filters">
+                            <div class="search-box">
+                                <i data-lucide="search"></i>
+                                <input type="text" id="search-input" placeholder="Search IP, Port, Protocol..." />
+                            </div>
+                            <div class="autoscroll-toggle">
+                                <input type="checkbox" id="autoscroll-check" checked />
+                                <label for="autoscroll-check">Auto-Scroll</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="packet-table-wrapper">
+                        <table class="packet-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">ID</th>
+                                    <th style="width: 10%">Time</th>
+                                    <th style="width: 20%">Source</th>
+                                    <th style="width: 20%">Destination</th>
+                                    <th style="width: 10%">Protocol</th>
+                                    <th style="width: 10%">Length</th>
+                                    <th style="width: 25%">Info</th>
+                                </tr>
+                            </thead>
+                            <tbody id="packet-list">
+                                <!-- Live rows inserted here -->
+                                <tr class="empty-state">
+                                    <td colspan="7">
+                                        <div class="empty-message">
+                                            <i data-lucide="radar"></i>
+                                            <p>No packets captured yet. Choose an interface and click Start Capture.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- THREAT LOG PANEL -->
+                <div class="card threat-log-card">
+                    <div class="card-header threat-header">
+                        <h2><i data-lucide="flame"></i> Threat Intelligence Alerts</h2>
+                        <span class="alert-count-badge" id="threats-badge">0 Alerts</span>
+                    </div>
+                    <div class="threat-list" id="threat-list">
+                        <div class="empty-alerts">
+                            <i data-lucide="shield-check"></i>
+                            <p>No network anomalies detected. System secure.</p>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+            
+        </main>
+        
+        <!-- SIDE DRAWER: PACKET DETAILED INSPECTOR -->
+        <div class="inspector-drawer" id="inspector-drawer">
+            <div class="drawer-header">
+                <div class="drawer-title-area">
+                    <h2>Packet Inspector</h2>
+                    <span id="inspector-packet-badge" class="proto-tag">Packet #0</span>
+                </div>
+                <button id="drawer-close-btn" class="close-btn"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="drawer-content">
+                <!-- Tabs -->
+                <div class="drawer-tabs">
+                    <button class="tab-btn active" data-tab="tab-decoded">Decoded Layers</button>
+                    <button class="tab-btn" data-tab="tab-hex">Hex Dump</button>
+                </div>
+                
+                <!-- Decoded Tree View Tab -->
+                <div class="tab-pane active" id="tab-decoded">
+                    <div id="decoded-layers-tree" class="decoded-tree">
+                        <!-- Clicked packet layer tree will be rendered here -->
+                    </div>
+                </div>
+                
+                <!-- Hex Dump Tab -->
+                <div class="tab-pane" id="tab-hex">
+                    <div class="hex-dump-container">
+                        <pre id="hex-dump-output" class="hex-dump">No payload data available for this packet.</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- JS Link -->
+    <script src="app.js"></script>
+</body>
+</html>
