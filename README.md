@@ -35,11 +35,11 @@ Built as a native desktop application, it combines a robust **Python backend** u
 
 ```mermaid
 graph TD
-    UserRun[python main.py] -->|Spawns| GUIWindow[Native Desktop Window (PyWebView)]
-    UserRun -->|Launches Background| FastAPI[FastAPI Server]
-    GUIWindow -->|Renders UI via| WebView[Embedded Web Engine]
-    NIC[Network Interface Card] -->|Raw Traffic| Scapy[Scapy Sniffer Thread]
-    Scapy -->|Parsed Packets| Analyzer[Threat & Stats Analyzer]
+    UserRun["python main.py"] -->|Spawns| GUIWindow["Native Desktop Window (PyWebView)"]
+    UserRun -->|Launches Background| FastAPI["FastAPI Server"]
+    GUIWindow -->|Renders UI via| WebView["Embedded Web Engine"]
+    NIC["Network Interface Card"] -->|Raw Traffic| Scapy["Scapy Sniffer Thread"]
+    Scapy -->|Parsed Packets| Analyzer["Threat & Stats Analyzer"]
     Analyzer -->|Real-time Data & Alerts| FastAPI
     FastAPI -->|WebSocket Stream| WebView
 ```
